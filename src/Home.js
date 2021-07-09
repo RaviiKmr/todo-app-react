@@ -1,15 +1,32 @@
 import { useState, useEffect } from "react";
 
+
 const Home = () => {
 
-    const clickMe = () => {
-        alert('hello');
+    const [title, setTitle] = useState('');
+    const [completed, setCompleted] = useState(false);
+    const [isPending, setIsPending] = useState(false);
+
+    const clickMe = (e) => {
+        e.preventDefault();
+        const task = {title, completed};
+        setIsPending(true);
+
+        fetch('http://127.0.0.1:8000/api/task-create/', {
+            method: 'POST',
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(task)
+        }).then(() => {
+            console.log('new task added');
+            setIsPending(false);
+            
+        })
     }
 
     const [lists, setLists] = useState(null);
 
     useEffect(() => {
-        fetch('https://jsonplaceholder.typicode.com/todos/')
+        fetch('http://127.0.0.1:8000/api/task-list')
             .then(res => {
                 return res.json();
             })
@@ -29,11 +46,12 @@ const Home = () => {
                 <div className="col col-11 mx-auto">
                     <div className="row bg-white rounded shadow-sm p-2 add-todo-wrapper align-items-center justify-content-center">
                         <div className="col">
-                            <input className="form-control form-control-lg border-0 add-todo-input bg-transparent rounded" type="text" placeholder="Add new .."></input>
+                            <input className="form-control form-control-lg border-0 add-todo-input bg-transparent rounded" type="text" placeholder="Add new .." onChange={e => setTitle(e.target.value)}></input>
                         </div>
 
                         <div className="col-auto px-0 mx-0 mr-2">
-                            <button type="button" onClick={clickMe} className="btn btn-primary">Add Task</button>
+                            {!isPending && <button type="button" onClick={clickMe} className="btn btn-primary">Add Task</button>}
+                            {isPending && <button type="button" onClick={clickMe} className="btn btn-primary" disabled>Adding Task...</button>}
                         </div>
                     </div>
                 </div>
